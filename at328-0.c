@@ -63,12 +63,12 @@ int main(void)
     LCD_sendCommand(0x80);
 
     //select_Fingerprint();
-    //select_GPS();
+    select_GPS();
 
     while (1) {
 
         //Gets data but is random
-        select_GPS();
+        //select_GPS();
         LCD_displayString((const char *)received_string);
         _delay_ms(1000);
     }

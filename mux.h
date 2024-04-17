@@ -14,4 +14,7 @@ void Mux_init() {
 
     // Set the MUX select pin as an output
     MUX_SELECT_DDR |= (1 << MUX_SELECT_PIN);
+
+    // Set GPS as default
+    MUX_SELECT_PORT |= (1 << MUX_SELECT_PIN);
 }
