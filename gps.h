@@ -5,48 +5,37 @@
 #include <stdlib.h> // For itoa() if available, or you might need to implement it
 #include <string.h> // For strcat and strcpy
 
-#define USART_BAUDRATE 9600
-#define BAUD_PRESCALE (((F_CPU / (USART_BAUDRATE * 16UL))) - 1)
+#define BAUD 9600
+#define MYUBRR F_CPU/16/BAUD-1
+#define BUFFER_SIZE 128
 
-enum {
-    CMD=0,
-    DATA,
-};
+#define MUX_SELECT_PIN PB0
+#define MUX_SELECT_PORT PORTB
+#define MUX_SELECT_DDR DDRB
 
-char buf[100];
-volatile int ind;
-volatile char flag,stringReceived;
-char gpgga[]={'$','G','P','G','G','A'};
+volatile char received_string[BUFFER_SIZE];
+volatile uint8_t received_index = 0;
 
-char latitude[12];
-char logitude[12];
-
-void serialbegin() {
-
-    // Enable USART, set frame format: 8 data bits, 1 stop bit, no parity
-    UCSR0C = (1 << UCSZ01) | (1 << UCSZ00);
-    
-    // Set baud rate
-    UBRR0H = (BAUD_PRESCALE >> 8);
-    UBRR0L = BAUD_PRESCALE;
-
-    // Enable receiver and transmitter, enable receive complete interrupt
+void USART_Init(unsigned int ubrr) {
+    UBRR0H = (unsigned char)(ubrr >> 8);
+    UBRR0L = (unsigned char)ubrr;
     UCSR0B = (1 << RXEN0) | (1 << TXEN0) | (1 << RXCIE0);
+    UCSR0C = (1 << UCSZ01) | (1 << UCSZ00);
 }
 
 ISR(USART_RX_vect) {
-    char ch = UDR0;  // Read received character from USART0 data register
+    char received_data = UDR0;
+    received_string[received_index++] = received_data;
 
-    buf[ind] = ch;   // Store received character in buffer
-    ind++;           // Increment buffer index
-
-    if (ind < 7) {
-        if (buf[ind - 1] != gpgga[ind - 1]) {  // Check for synchronization pattern "$GPGGA"
-            ind = 0;  // Reset buffer index if synchronization pattern does not match
-        }
+    if (received_data == '\r' || received_data == '\n' || received_index >= BUFFER_SIZE) {
+        received_string[received_index] = '\0';
+        received_index = 0;
     }
+}
 
-    if (ind >= 50) {
-        stringReceived = 1;  // Set flag to indicate complete string reception
-    }
+void select_GPS() {
+
+    // Clear the select pin to 0 to select input 1 of the mux (GPS TX)
+    MUX_SELECT_PORT &= ~(1 << MUX_SELECT_PIN);
+    
 }

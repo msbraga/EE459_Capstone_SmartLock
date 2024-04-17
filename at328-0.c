@@ -9,92 +9,69 @@
 #include "buzzer.h"
 #include "gps.h"
 #include "current.h"
+#include "mux.h"
+#include "fingerprint.h"
 
 // Define the frequency of the microcontroller
 #define F_CPU 16000000UL
 
 int main(void)
 {
+    //// START GPS AND MUX !!!!!
 
-    // Initialize LCD 
     LCD_DDR = 0xFF;
     LCD_init();
+    USART_Init(MYUBRR);
+    Mux_init();
+    sei(); 
 
-    //Initialize buzzer
-    initializeBuzzer();
-
-    //enable global interrupts
-    sei();
-
-    // Initial LCD set up 
-    LCD_sendCommand(0x01); // Clear display on the LCD when first flashing the code
+    //Clear and move cursor 
+    LCD_sendCommand(0x01);
     _delay_ms(2);
-    LCD_sendCommand(0x80); // Set cursor at the beginning
+    LCD_sendCommand(0x80);
 
-    LCD_displayString("Loading");
-    _delay_ms(4000);
+    //select_Fingerprint();
+    select_GPS();
 
-    while(1){
-        LCD_sendCommand(0x01); // Clear display on the LCD when first flashing the code
-        LCD_displayString("Listen for buzzer!");
-        playTone();
+    while (1) {
 
-        _delay_ms(3000); // Wait for a while 
+        //Gets data but is random
+        LCD_displayString((const char *)received_string);
+        _delay_ms(1000);
     }
 
-    // !!!!! GPS WORK IN PROGRESS CODE !!!!!
 
-    // serialbegin();
+    ////// END GPS AND FINGERPRINT 
+
+    //// START BUZZER !!!!!
+
     // // Initialize LCD 
     // LCD_DDR = 0xFF;
     // LCD_init();
+
+    // //Initialize buzzer
+    // initializeBuzzer();
+
+    // //enable global interrupts
+    // sei();
 
     // // Initial LCD set up 
     // LCD_sendCommand(0x01); // Clear display on the LCD when first flashing the code
     // _delay_ms(2);
     // LCD_sendCommand(0x80); // Set cursor at the beginning
 
-    // LCD_displayString("GPS Interfacing");
+    // LCD_displayString("Loading");
     // _delay_ms(4000);
-    // LCD_sendCommand(0x80); // Set cursor at the beginning
-    // LCD_displayString("Waiting for GPS");
-    // _delay_ms(2000);
-    // sei();
 
     // while(1){
+    //     LCD_sendCommand(0x01); // Clear display on the LCD when first flashing the code
+    //     LCD_displayString("Listen for buzzer!");
+    //     playTone();
 
-    //     if(stringReceived == 1){ //Problem is that string received is never 1
-            
-    //         cli();
-    //         for(int i=0;i<ind;i++) {
-    //             LCD_displayString(&buf[i]); 
-    //         }
-    //         ind=0;
-    //         stringReceived=0;
+    //     _delay_ms(3000); // Wait for a while 
+    // }
 
-    //         LCD_sendCommand(0x01);
-    //         _delay_ms(1000);
-
-    //         LCD_sendCommand(0x80);
-    //         LCD_displayString("Lat:");
-            
-    //         for(int i=15;i<27;i++) {
-    //             latitude[i]=buf[i];
-    //             LCD_displayString(&latitude[i]);
-    //         }
-
-    //         LCD_sendCommand(0xC0);
-    //         LCD_displayString("Log:");
-
-    //         for(int i=29;i<41;i++) {
-    //             logitude[i]=buf[i];
-    //             LCD_displayString(&logitude[i]);
-    //         }
-
-    //         _delay_ms(2000);
-    //         sei();
-    //     }
-    // } 
+    /// END BUZZER !!!!!
 
     return 0;   /* never reached */
 }
