@@ -13,7 +13,7 @@
 #include "fingerprint.h"
 
 // Define the frequency of the microcontroller
-#define F_CPU 16000000UL
+//#define F_CPU 16000000UL
 
 int main(void)
 {
@@ -51,11 +51,11 @@ int main(void)
     //////// END SELINA TEST FINGER PRINT
 
     //// START GPS AND MUX !!!!!
-    LCD_DDR = 0xFF;
-    LCD_init();
     USART_Init(MYUBRR);
+    LCD_init();
+
     Mux_init();
-    sei(); 
+    //sei(); 
 
     //Clear and move cursor 
     LCD_sendCommand(0x01);
@@ -69,7 +69,16 @@ int main(void)
 
         //Gets data but is random
         //select_GPS();
-        LCD_displayString((const char *)received_string);
+        //LCD_displayString((const char *)received_string);
+        LCD_set_cursor(0,0);
+        LCD_displayString("lat: ");
+        LCD_set_cursor(0,5);
+        LCD_displayString((const char *)latitude_buffer);
+        LCD_set_cursor(1,0);
+        LCD_displayString("lon: ");
+        LCD_set_cursor(1,5);
+        LCD_displayString((const char *)longitude_buffer);
+        _delay_ms(1000);
         _delay_ms(1000);
     }
 

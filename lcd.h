@@ -58,6 +58,7 @@ void LCD_displayString(const char *str) {
 void LCD_init() {
     // Configure control and data pins as output
    LCD_DDR |= (1 << LCD_RS) | (1 << LCD_EN) | (1 << LCD_D4) | (1 << LCD_D5) | (1 << LCD_D6) | (1 << LCD_D7); // Set control pins as output
+   LCD_PORT &= ~((1 << PD2) | (1 << PD3) | (1 << PD4) | (1 << PD5) | (1 << PD6) | (1 << PD7));
     _delay_ms(40); // Wait for more than 40ms after Vcc rises to 2.7V
     
 
@@ -80,3 +81,8 @@ void LCD_init() {
     LCD_sendCommand(0x06);
 
 } 
+
+void LCD_set_cursor(uint8_t row, uint8_t col) {
+    uint8_t row_offsets[] = {0x00, 0x40}; // Row offsets for a 2-line display
+    LCD_sendCommand(0x80 | (row_offsets[row] + col)); // Set DDRAM address
+}
