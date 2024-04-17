@@ -25,7 +25,7 @@ unsigned char uart_receive_byte(void) {
 
 void select_Fingerprint() {
 
-    // Set the select pin to 1 to select input 2 of the mux (Fingerprint TX)
-    MUX_SELECT_PORT |= (1 << MUX_SELECT_PIN);
+    //Clear the select pin to 0 to select (FINGERPRINT TX)
+    MUX_SELECT_PORT &= ~(1 << MUX_SELECT_PIN);
 
 }

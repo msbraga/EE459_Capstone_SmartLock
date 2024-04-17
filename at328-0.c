@@ -17,8 +17,40 @@
 
 int main(void)
 {
-    //// START GPS AND MUX !!!!!
+    ///// SELINAS FINGERPRINT TEST
+    
+    // LCD_init();
+    // LCD_displayString("hi");
 
+    // USART_Init(103); //9600 baud rate at 16MHz
+    // Mux_init();
+    // sei();
+
+
+    // // Initial LCD set up 
+    // LCD_sendCommand(0x01); // Clear display on the LCD when first flashing the code
+    // _delay_ms(2);
+    // LCD_sendCommand(0x80); // Set cursor at the beginning
+
+    // LCD_displayString("Starting up");
+    // _delay_ms(4000);
+
+    
+    // while(1){
+
+    //     // Check for any data from the fingerprint sensor
+    //     if (UCSR0A & (1<<RXC0)) {
+    //         select_Fingerprint();  // Select fingerprint sensor if data is received
+    //     } else {
+    //         select_GPS();  // Otherwise, select GPS sensor
+    //     }
+
+    //     _delay_ms(100);  // Small delay to prevent bouncing between selections
+    // }
+
+    //////// END SELINA TEST FINGER PRINT
+
+    //// START GPS AND MUX !!!!!
     LCD_DDR = 0xFF;
     LCD_init();
     USART_Init(MYUBRR);
@@ -31,15 +63,15 @@ int main(void)
     LCD_sendCommand(0x80);
 
     //select_Fingerprint();
-    select_GPS();
+    //select_GPS();
 
     while (1) {
 
         //Gets data but is random
+        select_GPS();
         LCD_displayString((const char *)received_string);
         _delay_ms(1000);
     }
-
 
     ////// END GPS AND FINGERPRINT 
 

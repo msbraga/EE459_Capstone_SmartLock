@@ -35,7 +35,7 @@ ISR(USART_RX_vect) {
 
 void select_GPS() {
 
-    // Clear the select pin to 0 to select input 1 of the mux (GPS TX)
-    MUX_SELECT_PORT &= ~(1 << MUX_SELECT_PIN);
+    // Set the select pin to 1 to select (GPS TX)
+    MUX_SELECT_PORT |= (1 << MUX_SELECT_PIN);
     
 }
