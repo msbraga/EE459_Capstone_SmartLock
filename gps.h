@@ -27,12 +27,11 @@ void USART_Init(unsigned int ubrr) {
     UCSR0B = (1 << RXEN0) | (1 << TXEN0) | (1 << RXCIE0);
     UCSR0C = (1 << UCSZ01) | (1 << UCSZ00);
 
-        // Make PD0 as input (RX) and PD1 as output (TX) explicitly for clarity
+    // Make PD0 as input (RX) and PD1 as output (TX) explicitly for clarity
     DDRD &= ~(1 << PD0); // Clear the PD0 bit in DDRD register to make it input
     DDRD |= (1 << PD1);  // Set the PD1 bit in DDRD register to make it output
 
     sei();
-
 }
 
 ISR(USART_RX_vect) {
@@ -49,15 +48,6 @@ ISR(USART_RX_vect) {
         // Handle buffer overflow
         received_index = 0;  // Reset buffer index
     }
-
-    /*
-
-    received_string[received_index++] = received_data;
-
-    if (received_data == '\r' || received_data == '\n' || received_index >= BUFFER_SIZE) {
-        received_string[received_index] = '\0';
-        received_index = 0;
-    } */
 }
 
 void parse_gps_data(char* nmea_sentence) {
@@ -92,8 +82,6 @@ void parse_gps_data(char* nmea_sentence) {
         }
     }
 }
-
-
 
 void select_GPS() {
 
