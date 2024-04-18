@@ -52,6 +52,7 @@ int main(void)
 
     //// START GPS AND MUX !!!!!
     USART_Init(MYUBRR);
+    SPI_init();
     LCD_init();
 
     Mux_init();
@@ -64,22 +65,32 @@ int main(void)
 
     //select_Fingerprint();
     select_GPS();
+    
+     //send_data_to_bluefruit("AT+BLEUART=on");  // Initialize UART service
+    _delay_ms(100); // Wait a bit after initialization
+    //char response[100];
 
     while (1) {
+        //_delay_ms(100); // Give some time for the module to respond
+        //read_response(response, sizeof(response));
+        //_delay_ms(1000); // Wait a bit after initialization
+        //send_data_to_bluefruit("ok hi");
+        //_delay_ms(1000); // Delay between commands or data transmissions
 
         //Gets data but is random
         //select_GPS();
-        //LCD_displayString((const char *)received_string);
-        LCD_set_cursor(0,0);
-        LCD_displayString("lat: ");
-        LCD_set_cursor(0,5);
-        LCD_displayString((const char *)latitude_buffer);
-        LCD_set_cursor(1,0);
-        LCD_displayString("lon: ");
-        LCD_set_cursor(1,5);
-        LCD_displayString((const char *)longitude_buffer);
-        _delay_ms(1000);
-        _delay_ms(1000);
+        LCD_displayString((const char *)temp);
+
+        //LCD_set_cursor(0,0);
+        //LCD_displayString("lat: ");
+        //LCD_set_cursor(0,5);
+        //LCD_displayString((const char *)latitude_buffer);
+        //LCD_set_cursor(1,0);
+        //LCD_displayString("lon: ");
+        //LCD_set_cursor(1,5);
+        //LCD_displayString((const char *)longitude_buffer);
+        _delay_ms(10000);
+
     }
 
     ////// END GPS AND FINGERPRINT 
