@@ -5,7 +5,6 @@
 #include <stdlib.h> // For itoa() if available, or you might need to implement it
 #include <string.h> // For strcat and strcpy
 
-
 #define FOSC 7.3728e6
 #define BAUD 9600
 #define MYUBRR FOSC/16/BAUD-1
@@ -17,74 +16,12 @@
 #define MUX_SELECT_PORT PORTB
 #define MUX_SELECT_DDR DDRB
 
-//for bluetooth 
-#define CS_BLUEFRUIT     PB1
-#define BLUEFRUIT_SPI_CS_PORT  PORTB
-#define BLUEFRUIT_SPI_CS_DDR   DDRB
-#define MOSI     PB3
-#define MISO     PB4
-#define SCK      PB5
-#define SS       PB2  // Even if not used, must be output to stay in Master mode
-
-char* temp;
-
 char received_string[BUFFER_SIZE];
 char latitude_buffer[LATITUDE_BUFFER_SIZE];
 char longitude_buffer[LONGITUDE_BUFFER_SIZE];
 volatile uint8_t received_index = 0;
 
-//for bluetooth 
-void SPI_init() {
-    // Set MOSI, SCK, and CS pins as outputs, MISO as input
-    DDRB |= (1 << MOSI) | (1 << SCK) | (1 << CS_BLUEFRUIT);
-    DDRB &= ~(1 << MISO);
-
-    // Set CS pin high to deactivate all SPI devices
-    PORTB |= (1 << CS_BLUEFRUIT);
-
-    // Initialize SPI settings here if not already done
-    // Example: Master mode, set clock rate, etc.
-    SPCR = (1 << SPE) | (1 << MSTR) | (1 << SPR0);
-}
-
-uint8_t spi_transfer(uint8_t data) {
-    // Start transmission by writing data to the SPI data register
-    SPDR = data;
-    // Wait for transmission complete (SPIF bit set in SPSR)
-    while (!(SPSR & (1<<SPIF)));
-     //LCD_displayString("got here?: ");
-
-    // Return the received data
-    return SPDR;
-}
-
-void select_bluefruit() {
-    PORTB &= ~(1 << CS_BLUEFRUIT); // Activate Bluefruit
-    _delay_ms(10);
-}
-
-void deselect_bluefruit() {
-    PORTB |= (1 << CS_BLUEFRUIT);  // Deactivate Bluefruit
-}
-
-void send_data_to_bluefruit(const char* data) {
-    select_bluefruit();
-   while (*data) {
-        spi_transfer(*data++);
-    }
-    spi_transfer('\r'); // Carriage return
-    spi_transfer('\n'); // New line
-    deselect_bluefruit();
-}
-
-void read_response(char* buffer, uint16_t buffer_size) {
-    select_bluefruit();
-    for (uint16_t i = 0; i < buffer_size; i++) {
-        buffer[i] = spi_transfer(0x00); // Sending dummy bytes to read response
-        if (buffer[i] == '\n') break; // Assume response ends with a newline
-    }
-    deselect_bluefruit();
-}
+void parse_gps_data(char* nmea_sentence);
 
 void USART_Init(unsigned int ubrr) {
     UBRR0H = (uint8_t)(ubrr >> 8);
@@ -101,6 +38,8 @@ void USART_Init(unsigned int ubrr) {
 
 ISR(USART_RX_vect) {
 
+    cli(); //disable interrupts while processing 
+
     char received_data = UDR0;
 
     if (received_data == '\n' || received_data == '\r') {  // End of a sentence
@@ -113,41 +52,37 @@ ISR(USART_RX_vect) {
         // Handle buffer overflow
         received_index = 0;  // Reset buffer index
     }
+
+    sei(); //reenable interrupts 
 }
 
 void parse_gps_data(char* nmea_sentence) {
-    if (strncmp(nmea_sentence, "$GPGGA,", 7) == 0) {  // Check if it's a GPGGA sentence
-
-        temp = nmea_sentence;
-
-        char* token = strtok(nmea_sentence, ",");
-        int token_count = 0;
-        
-        while (token != NULL) {
+    char* token = strtok(nmea_sentence, ",");
+    while(token != NULL) {
+        // Check for GPGGA sentence
+        if (strcmp(token, "$GPGGA") == 0) {
+            // Skip one token (e.g., time) before latitude
             token = strtok(NULL, ",");
-            token_count++;
-            
-            if (token_count == 2) {  // Latitude
-                strncpy(latitude_buffer, token, LATITUDE_BUFFER_SIZE - 1);
-                latitude_buffer[LATITUDE_BUFFER_SIZE - 1] = '\0';  // Ensure null-termination
-                token = strtok(NULL, ",");  // Get N or S
-                if (token && token[0] == 'S') {
-                    strncat(latitude_buffer, " S", 2);  // Append S if south
-                } else {
-                    strncat(latitude_buffer, " N", 2);  // Append N otherwise
-                }
-            } else if (token_count == 4) {  // Longitude
-                strncpy(longitude_buffer, token, LONGITUDE_BUFFER_SIZE - 1);
-                longitude_buffer[LONGITUDE_BUFFER_SIZE - 1] = '\0';  // Ensure null-termination
-                token = strtok(NULL, ",");  // Get E or W
-                if (token && token[0] == 'W') {
-                    strncat(longitude_buffer, " W", 2);  // Append W if west
-                } else {
-                    strncat(longitude_buffer, " E", 2);  // Append E otherwise
-                }
-                break;  // No need to continue parsing after longitude
-            }
+
+            // Latitude
+            token = strtok(NULL, ",");
+            strncpy(latitude_buffer, token, 2); // Extract degrees
+            latitude_buffer[2] = '.'; // Add decimal point
+            strncpy(latitude_buffer + 3, token + 2, 2); // Extract minutes
+            strcat(latitude_buffer, " "); // Add a space
+            token = strtok(NULL, ","); // Grab the direction
+            strcat(latitude_buffer, token); // Append latitude hemisphere
+            latitude_buffer[strlen(latitude_buffer)] = '\0'; // Null terminate
+
+            // Longitude
+            token = strtok(NULL, ",");
+            strncpy(longitude_buffer, token, 3); // Extract degrees
+            longitude_buffer[3] = '.'; // Add decimal point
+            strncpy(longitude_buffer + 4, token + 3, 2); // Extract minutes
+            longitude_buffer[6] = '\0'; // Null terminate
+            return;
         }
+        token = strtok(NULL, ",");
     }
 }
 
