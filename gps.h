@@ -57,6 +57,7 @@ ISR(USART_RX_vect) {
 }
 
 void parse_gps_data(char* nmea_sentence) {
+
     char* token = strtok(nmea_sentence, ",");
     while(token != NULL) {
         // Check for GPGGA sentence
@@ -64,26 +65,102 @@ void parse_gps_data(char* nmea_sentence) {
             // Skip one token (e.g., time) before latitude
             token = strtok(NULL, ",");
 
-            // Latitude
-            token = strtok(NULL, ",");
-            strncpy(latitude_buffer, token, 2); // Extract degrees
-            latitude_buffer[2] = '.'; // Add decimal point
-            strncpy(latitude_buffer + 3, token + 2, 2); // Extract minutes
-            strcat(latitude_buffer, " "); // Add a space
-            token = strtok(NULL, ","); // Grab the direction
-            strcat(latitude_buffer, token); // Append latitude hemisphere
-            latitude_buffer[strlen(latitude_buffer)] = '\0'; // Null terminate
+        // Latitude
+        token = strtok(NULL, ",");
+        char *dot_position = strchr(token, '.');
+        if (dot_position != NULL) {
+            size_t degrees_len = dot_position - token;
+            strncpy(latitude_buffer, token, degrees_len);
+            latitude_buffer[degrees_len] = '\0'; // Null terminate the degrees part
+            char minutes_str[6];
+            snprintf(minutes_str, sizeof(minutes_str), ".%.2s ", dot_position + 1);
+            strcat(latitude_buffer, minutes_str);
+            strcat(latitude_buffer, strtok(NULL, ","));
+        }
 
-            // Longitude
-            token = strtok(NULL, ",");
-            strncpy(longitude_buffer, token, 3); // Extract degrees
-            longitude_buffer[3] = '.'; // Add decimal point
-            strncpy(longitude_buffer + 4, token + 3, 2); // Extract minutes
-            longitude_buffer[6] = '\0'; // Null terminate
+        // Longitude
+        token = strtok(NULL, ",");
+        dot_position = strchr(token, '.');
+        if (dot_position != NULL) {
+            size_t degrees_len = dot_position - token;
+            strncpy(longitude_buffer, token, degrees_len);
+            longitude_buffer[degrees_len] = '\0'; // Null terminate the degrees part
+            char minutes_str[6];
+            snprintf(minutes_str, sizeof(minutes_str), ".%.2s ", dot_position + 1);
+            strcat(longitude_buffer, minutes_str);
+            strcat(longitude_buffer, strtok(NULL, ","));
+        }
+
+
+            // // Latitude
+            // token = strtok(NULL, ",");
+            // size_t dot_position = strcspn(token, ".");
+            // if (dot_position != strlen(token)) {
+            //     strncpy(latitude_buffer, token, dot_position); // Copy the characters before the period
+            //     latitude_buffer[dot_position] = '\0'; // Null terminate the degrees part
+
+            //     size_t len = strlen(latitude_buffer);
+            //     if (len > 2) { // Check if there are enough characters for adding the period
+
+            //         char minutes_str[3];
+            //         strncpy(minutes_str, latitude_buffer + len - 2, 2);
+            //         minutes_str[2] = '\0'; // Null terminate minutes_str
+
+            //         latitude_buffer[len - 2] = '.';
+            //         latitude_buffer[len - 1] = minutes_str[0];
+            //         latitude_buffer[len] = minutes_str[1];  
+            //         latitude_buffer[len + 1] = ' '; // Add space before direction
+
+            //         // Concatenate latitude direction
+            //         token = strtok(NULL, ",");
+            //         strcat(latitude_buffer, token);
+
+            //         latitude_buffer[strlen(latitude_buffer)] = '\0'; 
+            //     }
+            // }
+
+            // // Longitude
+            // token = strtok(NULL, ",");
+            // dot_position = strcspn(token, ".");
+            // if (dot_position != strlen(token)) {
+            //     strncpy(longitude_buffer, token, dot_position); // Copy the characters before the period
+            //     longitude_buffer[dot_position] = '\0'; // Null terminate the degrees part
+
+            //     size_t len = strlen(longitude_buffer);
+            //     if (len > 2) { // Check if there are enough characters for adding the period
+
+            //         char minutes_str[3];
+            //         strncpy(minutes_str, longitude_buffer + len - 2, 2);
+            //         minutes_str[2] = '\0'; // Null terminate minutes_str
+
+            //         longitude_buffer[len - 2] = '.';
+            //         longitude_buffer[len - 1] = minutes_str[0];
+            //         longitude_buffer[len] = minutes_str[1];  
+            //         longitude_buffer[len + 1] = ' '; // Add space before direction
+
+            //         // Concatenate longitude direction
+            //         token = strtok(NULL, ",");
+            //         strcat(longitude_buffer, token);
+
+            //         longitude_buffer[strlen(longitude_buffer)] = '\0'; 
+            //     }
+            // }
+
             return;
         }
         token = strtok(NULL, ",");
     }
+}
+
+void display_lat_lon() {
+    LCD_set_cursor(0,0);
+    LCD_displayString("lat: ");
+    LCD_set_cursor(0,5);
+    LCD_displayString((const char *)latitude_buffer);
+    LCD_set_cursor(1,0);
+    LCD_displayString("lon: ");
+    LCD_set_cursor(1,5);
+    LCD_displayString((const char *)longitude_buffer);
 }
 
 void select_GPS() {

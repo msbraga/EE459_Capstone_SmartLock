@@ -51,7 +51,7 @@ int main(void)
 
     //////// END SELINA TEST FINGER PRINT
 
-    //// START GPS AND MUX !!!!!
+    //// START BLUTOOTH !!!!!
     USART_Init(MYUBRR);
     SPI_init();
     LCD_init();
@@ -70,7 +70,6 @@ int main(void)
     //char response[100];
 
     while (1) {
-
         //Bluetooth tests 
 
         //_delay_ms(100); // Give some time for the module to respond
@@ -78,19 +77,13 @@ int main(void)
         //_delay_ms(1000); // Wait a bit after initialization
         //send_data_to_bluefruit("ok hi");
         //_delay_ms(1000); // Delay between commands or data transmissions
-       
-        LCD_set_cursor(0,0);
-        LCD_displayString("lat: ");
-        LCD_set_cursor(0,5);
-        LCD_displayString((const char *)latitude_buffer);
-        LCD_set_cursor(1,0);
-        LCD_displayString("lon: ");
-        LCD_set_cursor(1,5);
-        LCD_displayString((const char *)longitude_buffer);
+
+        //parse_gps_data("$GPGGA,123519,4807.038,N,01131.000,E,1,08,0.9,545.4,M,46.9,M,,*47");
+        display_lat_lon();
         _delay_ms(1000);
     }
 
-    ////// END GPS AND FINGERPRINT 
+    ////// END BLUETOOTH 
 
     //// START BUZZER !!!!!
 
