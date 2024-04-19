@@ -18,6 +18,64 @@
 
 int main(void)
 {
+    //// END CURRENT SENSOR AND GPS !!!!!
+    USART_Init(MYUBRR);
+    SPI_init();
+    LCD_init();
+    Mux_init();
+
+    //for current sensor
+    adc_init();
+    char output[128];
+
+    //Clear and move cursor 
+    LCD_sendCommand(0x01);
+    _delay_ms(2);
+    LCD_sendCommand(0x80);
+
+    //select_Fingerprint();
+    select_GPS();
+    
+    //Bluetooth stuff 
+    //send_data_to_bluefruit("AT+BLEUART=on");  // Initialize UART service
+    _delay_ms(100); 
+    //char response[100];
+    adc_select_channel(1); // Assuming PC1 is channel 1
+
+    while (1) {
+
+        uint16_t adc_value = adc_read();  // Read ADC value from channel 0 (PC0)
+        float voltage = adc_value * (5.0 / 1023.0);  // Convert ADC value to voltage
+        float current = (voltage - 2.5) / 0.185;  
+        char adc_buffer[32]; // Ensure the buffer is large enough for the string and null terminator
+
+        floatToStr(adc_buffer, adc_value, 3); // Formats the float with two decimal places
+        LCD_set_cursor(0,0);
+        LCD_displayString("adc ");
+        LCD_set_cursor(0,5);
+        LCD_displayString(adc_buffer);
+
+        char current_buffer[32]; // Ensu
+        floatToStr(current_buffer, current, 3); //
+        LCD_set_cursor(1,0);
+        LCD_displayString("current");
+        LCD_set_cursor(1,8);
+        LCD_displayString(current_buffer);
+
+        //display_lat_lon();
+
+        //Bluetooth tests 
+        //_delay_ms(100); // Give some time for the module to respond
+        //read_response(response, sizeof(response));
+        //_delay_ms(1000); // Wait a bit after initialization
+        //send_data_to_bluefruit("ok hi");
+        //_delay_ms(1000); // Delay between commands or data transmissions
+
+        _delay_ms(10000);
+    }
+
+    ////// END CURRENT SENSOR AND GPS
+
     ///// SELINAS FINGERPRINT TEST
     
     // LCD_init();
@@ -50,40 +108,6 @@ int main(void)
     // }
 
     //////// END SELINA TEST FINGER PRINT
-
-    //// START BLUTOOTH !!!!!
-    USART_Init(MYUBRR);
-    SPI_init();
-    LCD_init();
-    Mux_init();
-
-    //Clear and move cursor 
-    LCD_sendCommand(0x01);
-    _delay_ms(2);
-    LCD_sendCommand(0x80);
-
-    select_GPS();
-    
-    //Bluetooth stuff ??
-    //send_data_to_bluefruit("AT+BLEUART=on");  // Initialize UART service
-    _delay_ms(100); 
-    //char response[100];
-
-    while (1) {
-        //Bluetooth tests 
-
-        //_delay_ms(100); // Give some time for the module to respond
-        //read_response(response, sizeof(response));
-        //_delay_ms(1000); // Wait a bit after initialization
-        //send_data_to_bluefruit("ok hi");
-        //_delay_ms(1000); // Delay between commands or data transmissions
-
-        //parse_gps_data("$GPGGA,123519,4807.038,N,01131.000,E,1,08,0.9,545.4,M,46.9,M,,*47");
-        display_lat_lon();
-        _delay_ms(1000);
-    }
-
-    ////// END BLUETOOTH 
 
     //// START BUZZER !!!!!
 

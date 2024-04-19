@@ -5,18 +5,36 @@
 #include <stdlib.h> // For itoa() if available, or you might need to implement it
 #include <string.h> // For strcat and strcpy
 
+#define F_CPU 16000000UL  // Clock Speed
 void adc_init();
 
-//set up for the curent sensor
-uint8_t adc_read(uint8_t channel) {
-    // Select ADC channel with safety mask
-    ADMUX = (ADMUX & 0xF0) | (channel & 0x0F);
+//set up for the current sensor
+uint8_t adc_read() {
+
     // Start single conversion
     ADCSRA |= (1<<ADSC);
     // Wait for conversion to complete
     while (ADCSRA & (1<<ADSC));
     // Return the 8-bit result
     return ADCH;
+}
+
+void uint16_to_string(uint16_t num, char *str) {
+    char *p = str;
+    uint16_t shifter = num;
+    
+    // Move to where representation ends
+    do {
+        ++p;
+        shifter = shifter / 10;
+    } while (shifter);
+    *p = '\0';  // Terminate string
+
+    // Move back, inserting digits as you go
+    do {
+        *--p = '0' + (num % 10);
+        num /= 10;
+    } while (num);
 }
 
 //so that the current and voltage read can be printed on the LCD
@@ -60,8 +78,18 @@ void floatToStr(char* outStr, float value, int decimalPlaces) {
 //init for the current sensor
 void adc_init() {
     // Reference AVcc, left adjust result (for 8-bit precision)
-    ADMUX = (1<<REFS0) | (1<<ADLAR);
-    // Enable ADC and set prescaler to 128
-    ADCSRA = (1<<ADEN) | (1<<ADPS2) | (1<<ADPS1) | (1<<ADPS0);
+    ADMUX = (1<<REFS0);
+    //ADMUX = (1<<REFS0) | (1<<ADLAR);
+    // Set the ADC clock prescaler (e.g., divide by 128 for 16MHz CPU)
+    ADCSRA |= (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0);
+    // Enable the ADC
+    ADCSRA |= (1 << ADEN);
 
+}
+
+void adc_select_channel(uint8_t channel) {
+    // Clear the bottom 4 bits (channel selection bits)
+    ADMUX &= 0xF0;
+    // Set the channel
+    ADMUX |= (channel & 0x0F);
 }
