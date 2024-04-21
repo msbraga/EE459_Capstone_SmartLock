@@ -5,7 +5,7 @@
 #include <stdlib.h> // For itoa() if available, or you might need to implement it
 #include <string.h> // For strcat and strcpy
 
-#define F_CPU 16000000UL  // Clock Speed
+// #define F_CPU 16000000UL  // Clock Speed
 
 void adc_init() {
     // Reference AVcc, left adjust result (for 8-bit precision)
@@ -24,18 +24,7 @@ void adc_select_channel(uint8_t channel) {
     ADMUX |= (channel & 0x0F);
 }
 
-// uint16_t adc_read(uint16_t channel) {
-
-//     ADMUX = (ADMUX & 0xF8) | (channel & 0x07); // Clear the channel bits and set them according to the desired channel
-//     //ADMUX = (ADMUX & 0xF0) | (channel & 0x0F);
-
-//     ADCSRA |= (1 << ADSC);                     // Start conversion
-//     while (ADCSRA & (1 << ADSC));              // Wait for conversion to complete
-//     return ADC;                                // Return the ADC value
-// }
-
 //set up for the current sensor
-uint16_t adc_read() {
 uint16_t adc_read() {
 
     // Start single conversion

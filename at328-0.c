@@ -37,7 +37,6 @@ int main(void)
     //select_Fingerprint();
     select_GPS();
 
-
     //char response[100];
     adc_select_channel(1); // Assuming PC1 is channel 1
 
