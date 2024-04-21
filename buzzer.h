@@ -6,14 +6,14 @@
 #include <string.h> // For strcat and strcpy
 
 //buzzer definitions
-#define BUZZER_PIN PB2
+#define BUZZER_PIN PC1
 #define BUZZER_DDR DDRB
 #define BUZZER_PORT PORTB
 #define BUZZER_TOGGLE() (BUZZER_PORT ^= (1 << BUZZER_PIN))
 
 void initializeBuzzer() {
     // Set the buzzer pin as an output
-        DDRB |= (1 << BUZZER_PIN);
+        DDRC |= (1 << BUZZER_PIN);
 
    // Setup PWM (e.g., using Timer1)
     TCCR1A |= (1 << COM1A0) | (1 << WGM10);  // Toggle OC1A on Compare Match, PWM, Phase Correct, 8-bit
@@ -27,10 +27,10 @@ void playTone() {
     // Enable the PWM signal on the pin
     TCCR1A |= (1 << COM1A0);
 
-    PORTB |= (1 << BUZZER_PIN); // Start the sound
+    PORTC |= (1 << BUZZER_PIN); // Start the sound
     _delay_ms(1000);  // Sound for 1 second
     // Disable the PWM signal to stop buzzing
     TCCR1A &= ~(1 << COM1A0);
 
-    PORTB &= ~(1 << BUZZER_PIN); // Stop the sound
+    PORTC &= ~(1 << BUZZER_PIN); // Stop the sound
 }

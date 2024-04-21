@@ -36,13 +36,14 @@ void adc_select_channel(uint8_t channel) {
 
 //set up for the current sensor
 uint16_t adc_read() {
+uint16_t adc_read() {
 
     // Start single conversion
     ADCSRA |= (1<<ADSC);
     // Wait for conversion to complete
     while (ADCSRA & (1<<ADSC));
     // Return the 8-bit result
-    return ADCH;
+    return ADC;
 }
 
 void uint16_to_string(uint16_t num, char *str) {
@@ -100,4 +101,5 @@ void floatToStr(char* outStr, float value, int decimalPlaces) {
         strcat(outStr, fracStr);
     }
 }
+
 

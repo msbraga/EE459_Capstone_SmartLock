@@ -4,6 +4,7 @@
 #include <avr/interrupt.h>
 #include <stdlib.h> // For itoa() if available, or you might need to implement it
 #include <string.h> // For strcat and strcpy
+#include <stdbool.h> // For bool, true, and false
 
 #include "lcd.h"
 #include "buzzer.h"
@@ -35,32 +36,44 @@ int main(void)
 
     //select_Fingerprint();
     select_GPS();
-    
-    //Bluetooth stuff 
-    //send_data_to_bluefruit("AT+BLEUART=on");  // Initialize UART service
-    _delay_ms(100); 
+
+
     //char response[100];
     adc_select_channel(1); // Assuming PC1 is channel 1
 
     while (1) {
 
-        uint16_t adc_value = adc_read();  // Read ADC value from channel 0 (PC0)
-        float voltage = adc_value * (5.0 / 1023.0);  // Convert ADC value to voltage
-        float current = (voltage - 2.5) / 0.185;  
+
+        uint16_t adc_value = adc_read();  
+        float voltage = adc_value * (4.8 / 1023.0);  // Convert ADC value to voltage
+        float sensitivity = 100.0 / 500.0;  // Sensitivity is 0.2 A/V
+        float current = (voltage - 2.5) * sensitivity;  // Calculate current
         char adc_buffer[32]; // Ensure the buffer is large enough for the string and null terminator
 
         floatToStr(adc_buffer, adc_value, 3); // Formats the float with two decimal places
         LCD_set_cursor(0,0);
-        LCD_displayString("adc ");
-        LCD_set_cursor(0,5);
+       // LCD_displayString("adc ");
+        //LCD_set_cursor(0,5);
         LCD_displayString(adc_buffer);
+
+        send_data_to_bluefruit("blue");
+        _delay_ms(100);
+
 
         char current_buffer[32]; // Ensu
         floatToStr(current_buffer, current, 3); //
         LCD_set_cursor(1,0);
-        LCD_displayString("current");
-        LCD_set_cursor(1,8);
+        //LCD_displayString("voltage:");
+        //LCD_set_cursor(1,8);
         LCD_displayString(current_buffer);
+        
+
+        if (data_available) {
+            // Handle data from the Bluetooth module
+            char buffer[256]; // Adjust size based on expected data
+            read_response(buffer, sizeof(buffer));
+            data_available = false; // Reset the flag
+        }
 
         //display_lat_lon();
 
@@ -71,7 +84,7 @@ int main(void)
         //send_data_to_bluefruit("ok hi");
         //_delay_ms(1000); // Delay between commands or data transmissions
 
-        _delay_ms(10000);
+        _delay_ms(1000);
     }
 
     ////// END CURRENT SENSOR AND GPS
