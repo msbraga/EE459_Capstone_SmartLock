@@ -5,18 +5,44 @@
 #include <stdlib.h> // For itoa() if available, or you might need to implement it
 #include <string.h> // For strcat and strcpy
 
-#define F_CPU 16000000UL  // Clock Speed
-void adc_init();
+//#define F_CPU 16000000UL  // Clock Speed
+
+void adc_init() {
+    // Reference AVcc, left adjust result (for 8-bit precision)
+    ADMUX = (1<<REFS0);
+    //ADMUX = (1<<REFS0) | (1<<ADLAR);
+    // Set the ADC clock prescaler (e.g., divide by 128 for 16MHz CPU)
+    ADCSRA |= (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0);
+    // Enable the ADC
+    ADCSRA |= (1 << ADEN);
+}
+
+void adc_select_channel(uint8_t channel) {
+    // Clear the bottom 4 bits (channel selection bits)
+    ADMUX &= 0xF0;
+    // Set the channel
+    ADMUX |= (channel & 0x0F);
+}
+
+// uint16_t adc_read(uint16_t channel) {
+
+//     ADMUX = (ADMUX & 0xF8) | (channel & 0x07); // Clear the channel bits and set them according to the desired channel
+//     //ADMUX = (ADMUX & 0xF0) | (channel & 0x0F);
+
+//     ADCSRA |= (1 << ADSC);                     // Start conversion
+//     while (ADCSRA & (1 << ADSC));              // Wait for conversion to complete
+//     return ADC;                                // Return the ADC value
+// }
 
 //set up for the current sensor
-uint8_t adc_read() {
+uint16_t adc_read() {
 
     // Start single conversion
     ADCSRA |= (1<<ADSC);
     // Wait for conversion to complete
     while (ADCSRA & (1<<ADSC));
     // Return the 8-bit result
-    return ADCH;
+    return ADC;
 }
 
 void uint16_to_string(uint16_t num, char *str) {
@@ -75,21 +101,3 @@ void floatToStr(char* outStr, float value, int decimalPlaces) {
     }
 }
 
-//init for the current sensor
-void adc_init() {
-    // Reference AVcc, left adjust result (for 8-bit precision)
-    ADMUX = (1<<REFS0);
-    //ADMUX = (1<<REFS0) | (1<<ADLAR);
-    // Set the ADC clock prescaler (e.g., divide by 128 for 16MHz CPU)
-    ADCSRA |= (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0);
-    // Enable the ADC
-    ADCSRA |= (1 << ADEN);
-
-}
-
-void adc_select_channel(uint8_t channel) {
-    // Clear the bottom 4 bits (channel selection bits)
-    ADMUX &= 0xF0;
-    // Set the channel
-    ADMUX |= (channel & 0x0F);
-}
