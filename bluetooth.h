@@ -95,9 +95,8 @@ void send_data_to_bluefruit(const char* data) {
             _delay_ms(250);
         }
         count++;
-        LCD_set_cursor(1,1);
-        LCD_displayString("out");
-        _delay_ms(250);
+        //LCD_displayString("count");
+        //_delay_ms(250);
     }
     SPDR = '\r'; // Send data via SPI
      while (!(SPSR & (1 << SPIF))); // Wait for transfer to complete

@@ -57,8 +57,8 @@ int main(void)
 
         send_data_to_bluefruit("Hey");
         _delay_ms(100);
-        LCD_set_cursor(1,1);
-        LCD_displayString("Out");
+        //LCD_set_cursor(1,1);
+        //LCD_displayString("Out");
 
 
         char current_buffer[32]; // Ensu
@@ -69,11 +69,11 @@ int main(void)
         LCD_displayString(current_buffer);
         
 
-        if (data_available) {
+        if (data_available==1) {
             // Handle data from the Bluetooth module
             char buffer[256]; // Adjust size based on expected data
             read_response(buffer, sizeof(buffer));
-            data_available = false; // Reset the flag
+            data_available = 0; // Reset the flag
         }
 
         //display_lat_lon();
