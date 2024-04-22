@@ -86,7 +86,7 @@ void send_data_to_bluefruit(const char* data) {
         while (!(SPSR & (1 << SPIF))); // Wait for transfer to complete
         if ( count % 2 == 0) {
             LCD_set_cursor(1,5);
-             LCD_displayString("ev  ");
+             LCD_displayString("even");
              _delay_ms(250);
 
         } else {
