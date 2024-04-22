@@ -69,7 +69,8 @@ void floatToStr(char* outStr, float value, int decimalPlaces) {
         strcat(outStr, ".");
 
         // Handle fractional part
-        for (int i = 0; i < decimalPlaces; ++i) {
+        int i;
+        for (i = 0; i < decimalPlaces; ++i) {
             fractionalPart *= 10;
         }
 
@@ -82,7 +83,7 @@ void floatToStr(char* outStr, float value, int decimalPlaces) {
 
         // Add leading zeros to fractional part if necessary
         int fracStrLen = strlen(fracStr);
-        for (int i = fracStrLen; i < decimalPlaces; i++) {
+        for (i = fracStrLen; i < decimalPlaces; i++) {
             strcat(outStr, "0");
         }
 

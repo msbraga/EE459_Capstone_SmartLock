@@ -55,8 +55,10 @@ int main(void)
         //LCD_set_cursor(0,5);
         LCD_displayString(adc_buffer);
 
-        send_data_to_bluefruit("blue");
+        send_data_to_bluefruit("Hey");
         _delay_ms(100);
+        LCD_set_cursor(1,1);
+        LCD_displayString("Out");
 
 
         char current_buffer[32]; // Ensu

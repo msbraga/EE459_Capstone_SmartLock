@@ -10,13 +10,13 @@
 #define IRQ_BLUEFRUIT PB2
 #define BLUEFRUIT_SPI_CS_PORT  PORTB
 #define BLUEFRUIT_SPI_CS_DDR   DDRB
-#define MOSI     PB3
-#define MISO     PB4
-#define SCK      PB5
-#define SS       PB2  // Even if not used, must be output to stay in Master mode
+#define MOSI PB3
+#define MISO PB4
+#define SCK PB5
+#define SS PB2  // Even if not used, must be output to stay in Master mode
 
 
-volatile bool data_available = true; // Flag to indicate data from the BLE module
+volatile int data_available = 1; // Flag to indicate data from the BLE module
 
 //for bluetooth 
 void SPI_init() {
@@ -86,7 +86,7 @@ void send_data_to_bluefruit(const char* data) {
         while (!(SPSR & (1 << SPIF))); // Wait for transfer to complete
         if ( count % 2 == 0) {
             LCD_set_cursor(1,5);
-             LCD_displayString("even");
+             LCD_displayString("ev");
              _delay_ms(250);
 
         } else {
@@ -95,6 +95,9 @@ void send_data_to_bluefruit(const char* data) {
             _delay_ms(250);
         }
         count++;
+        LCD_set_cursor(1,1);
+        LCD_displayString("out");
+        _delay_ms(250);
     }
     SPDR = '\r'; // Send data via SPI
      while (!(SPSR & (1 << SPIF))); // Wait for transfer to complete
@@ -109,7 +112,8 @@ void send_data_to_bluefruit(const char* data) {
 
 void read_response(char* buffer, uint16_t buffer_size) {
     select_bluefruit();
-    for (uint16_t i = 0; i < buffer_size; i++) {
+    uint16_t i;
+    for (i = 0; i < buffer_size; i++) {
         buffer[i] = spi_transfer(0x00); // Sending dummy bytes to read response
         if (buffer[i] == '\n') break; // Assume response ends with a newline
     }
@@ -117,5 +121,5 @@ void read_response(char* buffer, uint16_t buffer_size) {
 }
 
 ISR(INT0_vect) { // ISR for INT0 (IRQ)
-    data_available = true; // Set flag when IRQ is triggered
+    data_available = 1; // Set flag when IRQ is triggered
 }
