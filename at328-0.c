@@ -47,14 +47,14 @@ int main(void)
     while (1) {
 
         uint16_t adc_value = adc_read();  
-
-        if (adc_value < 200) { //LOCKED - Change this threshold 
+        
+        if (adc_value > 200) { //LOCKED - Change this threshold 
             locked_routine();
         } else if (fingerprint){ //UNLOCKED 
             unlocked_routine();
         } else {
             broken_into_routine();
-        }
+        } 
     }
 
     return 0;   /* never reached */
