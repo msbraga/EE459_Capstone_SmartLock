@@ -13,15 +13,8 @@ void adc_init() {
     //ADMUX = (1<<REFS0) | (1<<ADLAR);
     // Set the ADC clock prescaler (e.g., divide by 128 for 16MHz CPU)
     ADCSRA |= (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0);
-    // Enable the ADC
+    // Enable the ADC and adc interrupt 
     ADCSRA |= (1 << ADEN);
-}
-
-void adc_select_channel(uint8_t channel) {
-    // Clear the bottom 4 bits (channel selection bits)
-    ADMUX &= 0xF0;
-    // Set the channel
-    ADMUX |= (channel & 0x0F);
 }
 
 //set up for the current sensor
@@ -34,6 +27,17 @@ uint16_t adc_read() {
     // Return the 8-bit result
     return ADC;
 }
+
+
+
+void adc_select_channel(uint8_t channel) {
+    // Clear the bottom 4 bits (channel selection bits)
+    ADMUX &= 0xF0;
+    // Set the channel
+    ADMUX |= (channel & 0x0F);
+}
+
+
 
 void uint16_to_string(uint16_t num, char *str) {
     char *p = str;
@@ -69,8 +73,7 @@ void floatToStr(char* outStr, float value, int decimalPlaces) {
         strcat(outStr, ".");
 
         // Handle fractional part
-        int i;
-        for (i = 0; i < decimalPlaces; ++i) {
+        for (int i = 0; i < decimalPlaces; ++i) {
             fractionalPart *= 10;
         }
 
@@ -83,7 +86,7 @@ void floatToStr(char* outStr, float value, int decimalPlaces) {
 
         // Add leading zeros to fractional part if necessary
         int fracStrLen = strlen(fracStr);
-        for (i = fracStrLen; i < decimalPlaces; i++) {
+        for (int i = fracStrLen; i < decimalPlaces; i++) {
             strcat(outStr, "0");
         }
 

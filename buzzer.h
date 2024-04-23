@@ -6,7 +6,7 @@
 #include <string.h> // For strcat and strcpy
 
 //buzzer definitions
-#define BUZZER_PIN PC1
+#define BUZZER_PIN PC0
 #define BUZZER_DDR DDRB
 #define BUZZER_PORT PORTB
 #define BUZZER_TOGGLE() (BUZZER_PORT ^= (1 << BUZZER_PIN))

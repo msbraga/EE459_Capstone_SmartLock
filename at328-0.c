@@ -20,14 +20,17 @@
 void locked_routine(); 
 void broken_into_routine();
 void unlocked_routine(); 
+bool unlocked_legally = false;
+//bool unlocked_illegally = false;
+bool prev_locked = false;
 
 int main(void)
 {
     //// Main Bike Program 
+    Mux_init();
     USART_Init(MYUBRR);
     SPI_init();
     LCD_init();
-    Mux_init();
     initializeBuzzer();
 
     //for current sensor
@@ -42,45 +45,77 @@ int main(void)
 
     adc_select_channel(1); // Assuming PC1 is channel 1
 
-    bool fingerprint = true; 
+
 
     while (1) {
 
-        uint16_t adc_value = adc_read();  
-        
-        if (adc_value > 200) { //LOCKED - Change this threshold 
-            locked_routine();
-        } else if (fingerprint){ //UNLOCKED 
-            unlocked_routine();
+       // bool fingerprint = is_finger_present();
+        bool fingerprint = false;
+
+
+        uint16_t adc_value = adc_read(); 
+
+    
+        char adc_buffer[32]; // Ensure the buffer is large enough for the string and null terminator
+
+/*
+        floatToStr(adc_buffer, adc_value, 3); // Formats the float with two decimal places
+        LCD_set_cursor(0,0);
+        LCD_displayString(adc_buffer); 
+        _delay_ms(500); */
+/*
+        if(fingerprint) {
+            LCD_displayString("unlocked");
+            _delay_ms(500);
         } else {
-            broken_into_routine();
+            LCD_displayString("no");
+            _delay_ms(500);
+        } */
+
+        if (unlocked_legally == false) {
+           if (adc_value < 217) { //LOCKED - Change this threshold 
+                locked_routine();
+            }  
+            else if (fingerprint){ //UNLOCKED 
+                unlocked_routine();
+            } else {
+                broken_into_routine();
+            } 
+        } else if (unlocked_legally == true){
+            LCD_set_cursor(0,0);
+            LCD_displayString("Bike unlocked!");
+            _delay_ms(4000);
+            unlocked_legally = false;
+            prev_locked = false;
         } 
     }
+   
 
     return 0;   /* never reached */
 }
 
 void locked_routine() {
-    LCD_set_cursor(0,0);
-    LCD_displayString("Bike is secure");
-    _delay_ms(1000);
-    LCD_set_cursor(1,0);
-    LCD_displayString("Location...");
-    _delay_ms(1000);
+    if (prev_locked == false) {
+        LCD_set_cursor(0,0);
+        LCD_displayString("Bike is secure");
+         LCD_set_cursor(1,0);
+         LCD_displayString("Location...");
+        _delay_ms(1000);
+        //Clear
+        LCD_sendCommand(0x01);
+        _delay_ms(2);
 
-    //Clear
-    LCD_sendCommand(0x01);
-    _delay_ms(2);
-
-    //Show location
-    display_lat_lon();
-    _delay_ms(3000);
+         //Show location
+        display_lat_lon();
+        _delay_ms(300);
+    }
+    prev_locked = true;
 }
 
 void unlocked_routine() {
     LCD_set_cursor(0,0);
     LCD_displayString("Bike unlocked");
-    _delay_ms(1000);
+    _delay_ms(500);
     LCD_set_cursor(1,0);
     LCD_displayString("Location...");
     _delay_ms(1000);
@@ -91,7 +126,8 @@ void unlocked_routine() {
 
     //Show location
     display_lat_lon();
-    _delay_ms(3000);
+    _delay_ms(1000);
+    unlocked_legally = true;
 }
 
 void broken_into_routine() {
@@ -101,15 +137,11 @@ void broken_into_routine() {
     LCD_set_cursor(0,0);
     LCD_displayString("Bike stolen!");
     _delay_ms(1000);
-    LCD_set_cursor(1,0);
-    LCD_displayString("Location...");
-    _delay_ms(1000);
 
     //Clear
     LCD_sendCommand(0x01);
     _delay_ms(2);
 
-    //Show location
-    display_lat_lon();
-    _delay_ms(3000);
+    prev_locked = false;
+
 }
